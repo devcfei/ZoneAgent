@@ -1,0 +1,82 @@
+// header.h : include file for standard system include files,
+// or project specific include files
+//
+
+#pragma once
+
+#include <SDKDDKVer.h>
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+// Windows Header Files
+#include <windows.h>
+#include <strsafe.h>
+#include <shlobj.h>
+#include <shlwapi.h>
+
+// ATL
+#include <atlconv.h>
+
+// Socket
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <mswsock.h>
+
+// C RunTime Header Files
+#include <stdlib.h>
+#include <malloc.h>
+#include <memory.h>
+#include <tchar.h>
+#include <stdarg.h>
+
+// STL
+#include <vector>
+#include <list>
+#include <string>
+namespace std
+{
+
+#if defined(_UNICODE)
+    typedef wstring tstring;
+#else
+    typedef string tstring;
+#endif
+};
+
+
+
+
+#if defined _M_IX86
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_IA64
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_X64
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#else
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
+
+
+// Resources
+#include "resource.h"
+
+
+
+// Private modules
+#include "Event.h"
+#include "Utils.h"
+#include "App.h"
+
+
+
+// global function
+extern App* GetApp();
+
+// Library
+#pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Ws2_32.lib")
+
+// libevent
+#pragma comment(lib, "event.lib")
+#pragma comment(lib, "event_core.lib")
+#pragma comment(lib, "event_extra.lib")
+#pragma comment(lib, "Iphlpapi.lib")
+#pragma comment(lib, "bcrypt.lib")
