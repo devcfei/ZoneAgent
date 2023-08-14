@@ -16,12 +16,12 @@ HRESULT App::Initialize(HINSTANCE hInstance)
     StringCchCopy(szCfgFile, MAX_PATH, szAppPath_);
     StringCchCat(szCfgFile, MAX_PATH, _T("\\ZoneAgent.ini"));
 
-    // initialize LoginAgent
-    //hr = LA_.Initialize(szCfgFile);
+    // initialize ZoneAgent
+    hr = ZA_.Initialize(szCfgFile);
     // lock
     InitializeCriticalSection(&csLog_);
 
-    //hr = LibEvent::Initialize(LA_.GetPort());
+    //hr = LibEvent::Initialize(ZA_.GetPort());
 
 
     return hr;

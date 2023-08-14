@@ -63,8 +63,17 @@ namespace std
 // Private modules
 #include "Event.h"
 #include "Utils.h"
+#include "Log.h"
+#include "ZoneAgent.h"
 #include "App.h"
 
+
+// Macro
+#define LOGF(...) LogPrintf(LOG_FATAL,__VA_ARGS__)
+#define LOGE(...) LogPrintf(LOG_ERROR,__VA_ARGS__)
+#define LOGW(...) LogPrintf(LOG_WARNING,__VA_ARGS__)
+#define LOGI(...) LogPrintf(LOG_INFO,__VA_ARGS__)
+#define LOGV(...) LogPrintf(LOG_VERBOSE,__VA_ARGS__)
 
 
 // global function

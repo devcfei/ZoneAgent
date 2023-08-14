@@ -141,12 +141,14 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="ZoneAgent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="winmain.cpp" />
     <ClCompile Include="ZoneAgent.cpp" />
   </ItemGroup>

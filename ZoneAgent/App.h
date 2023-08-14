@@ -30,6 +30,9 @@ private:
     INT_PTR OnColorStatic(HWND, UINT, WPARAM, LPARAM);
     INT_PTR OnCommand(HWND, UINT, WPARAM, LPARAM);
 
+    // ZoneAgent
+    ZoneAgent ZA_;
+
 
 
 };
