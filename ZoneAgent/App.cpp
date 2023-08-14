@@ -36,9 +36,9 @@ HRESULT App::Run()
 
 HRESULT App::Start()
 {
-    HRESULT hr = S_OK;
+    HRESULT hr = S_OK;   
 
-    //hr = LibEvent::Start();
+    hr = ZA_.Start();
 
     return hr;
 }
@@ -46,7 +46,9 @@ HRESULT App::Start()
 HRESULT App::Stop()
 {
     HRESULT hr = S_OK;
-    //hr = LibEvent::Stop();
+
+    hr = ZA_.Stop();
+
     return hr;
 }
 
@@ -121,6 +123,18 @@ INT_PTR App::OnInitDialog(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     HWND hWndEditLog = GetDlgItem(hDlg, IDC_EDIT_LOG);
 
     SetWindowText(hWndEditLog, lpszLatin);
+
+
+    HRESULT hr;
+    hr = GetApp()->Start();
+    if (FAILED(hr))
+    {
+        GetApp()->Stop();
+        LOGF(_T("App startup failed!\n"));
+    }
+
+    //PrintMessage(_T("App initialize success!\n"));
+
 
     return (INT_PTR)TRUE;
 }

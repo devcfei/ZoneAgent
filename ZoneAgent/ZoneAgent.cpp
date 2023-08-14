@@ -41,6 +41,9 @@ HRESULT ZoneAgent::Initialize(LPCTSTR lpszCfgFile)
         ReadConfig(lpszCfgFile);
     }
 
+
+    hr = LibEvent::Initialize(wZAPort_);
+
     return hr;
 }
 
@@ -49,12 +52,17 @@ HRESULT ZoneAgent::Start()
 {
     HRESULT hr = S_OK;
 
+    hr = LibEvent::Start();
+
+
     return hr;
 }
 
 HRESULT ZoneAgent::Stop()
 {
     HRESULT hr = S_OK;
+
+    hr = LibEvent::Stop();
 
     return hr;
 }
@@ -102,3 +110,72 @@ HRESULT ZoneAgent::WriteConfig(LPCTSTR lpszCfgFile)
     return hr;
 }
 
+
+
+HRESULT ZoneAgentSession::ProcessEvent(size_t len)
+{
+    PACKET_HEADER* hdr = (PACKET_HEADER*)pdata_;
+
+    switch (hdr->Ctrl)
+    {
+    case 1:
+        switch (hdr->Cmd)
+        {
+        case C2ZA_CMD_E2_LOGIN_REQUEST:
+            PACKET_ZA2C_LOGIN_RESP* pkt = (PACKET_ZA2C_LOGIN_RESP*)bufSend_;
+            ZeroMemory(bufSend_, sizeof(PACKET_ZA2C_LOGIN_RESP));
+            pkt->Header.Size = sizeof(PACKET_ZA2C_LOGIN_RESP);
+            pkt->Header.Ctrl = 0x3;
+            pkt->Header.Cmd = 0xFF;
+            pkt->Header.Uid = 0;
+            pkt->Header.Protocol = ZA2C_PROTO_1105_LOGIN_RESP;
+
+
+            int i = 0;
+            StringCchCopyA(pkt->rolebrief[i].name, 21, "test");
+            pkt->rolebrief[i].used = 1;
+            pkt->rolebrief[i].classtype = 1;
+            pkt->rolebrief[i].town = 1;
+            pkt->rolebrief[i].level = 165;
+
+
+            encode(bufSend_, sizeof(PACKET_ZA2C_LOGIN_RESP));
+
+            SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_LOGIN_RESP));
+
+            break;
+         
+        }
+        break;
+
+    case 3:
+        switch (hdr->Protocol)
+        {
+        case C2ZA_PROTO_1106_LOGIN_REQUEST:
+        {
+
+
+            break;
+        }
+
+        break;
+    }
+
+
+
+    
+
+   
+
+
+    }
+
+    return S_OK;
+}
+
+
+HRESULT ZoneAgentSession::OnClose()
+{
+    //GetApp()->NotifyEvent(EVENT_ID_USER_DISCONNECTED, WPARAM(this), 0);
+    return S_OK;
+}

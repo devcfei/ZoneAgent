@@ -68,6 +68,7 @@ namespace std
 #include "Utils.h"
 #include "Log.h"
 #include "Conn.h"
+#include "Packet.h"
 #include "ZoneAgent.h"
 #include "App.h"
 
