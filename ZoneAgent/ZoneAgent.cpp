@@ -149,10 +149,74 @@ HRESULT ZoneAgentSession::ProcessEvent(size_t len)
         break;
 
     case 3:
+        decode(pdata_, hdr->Size);
+
         switch (hdr->Protocol)
         {
-        case C2ZA_PROTO_1106_LOGIN_REQUEST:
+        case C2ZA_PROTO_1106_SELECT_ROLE:
         {
+            PACKET_ZA2C_CONFIRM_ROLE* pkt = (PACKET_ZA2C_CONFIRM_ROLE*)bufSend_;
+
+            ZeroMemory(bufSend_, sizeof(PACKET_ZA2C_CONFIRM_ROLE));
+            pkt->Header.Size = sizeof(PACKET_ZA2C_CONFIRM_ROLE);
+            pkt->Header.Ctrl = 0x3;
+            pkt->Header.Cmd = 0xFF;
+            pkt->Header.Uid = 0;
+            pkt->Header.Protocol = ZA2C_PROTO_1106_CONFIRM_ROLE;
+
+            StringCchCopyA(pkt->name, 29, "test");
+
+            encode(bufSend_, sizeof(PACKET_ZA2C_CONFIRM_ROLE));
+            SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_CONFIRM_ROLE));
+            break;
+        }
+
+        case C2ZA_PROTO_1107_WORLD_LOGIN:
+        {
+            PACKET_C2ZA_WORLD_LOGIN *pktIn = (PACKET_C2ZA_WORLD_LOGIN*)pdata_;
+
+            USES_CONVERSION;
+            LOGI(_T("ROLE: %s login to world!\n"), A2T(pktIn->name));
+
+
+            PACKET_ZA2C_WORLD_LOGIN_RESP* pkt = (PACKET_ZA2C_WORLD_LOGIN_RESP*)bufSend_;
+
+            ZeroMemory(bufSend_, sizeof(PACKET_ZA2C_WORLD_LOGIN_RESP));
+            pkt->Header.Size = sizeof(PACKET_ZA2C_WORLD_LOGIN_RESP);
+            pkt->Header.Ctrl = 0x3;
+            pkt->Header.Cmd = 0xFF;
+            pkt->Header.Uid = 0;
+            pkt->Header.Protocol = ZA2C_PROTO_1107_WORLD_LOGIN_RESP;
+
+
+            // Role info
+            pkt->unknown1 = 1;
+            pkt->Level = 165;
+            pkt->Exp = 4220806300;
+            pkt->MapIndex = 8;
+            pkt->MapCell = 0x5c5d;
+
+            pkt->MP = 10;
+            pkt->HP = 100;
+            pkt->Str = 200;
+            pkt->Magic = 60;
+            pkt->Dex = 46;
+            pkt->Vit = 50;
+            pkt->Mana = 65;
+            pkt->MaxHPBar = 1000;
+            pkt->MaxMPBar = 500;
+            pkt->MaxHPStore = 200000;
+            pkt->MaxMPStore = 5000;
+
+            pkt->Sinfo = 1025;
+            pkt->LorePoint = 5000;
+
+
+            StringCchCopyA(pkt->CharacterName, 21, "test");
+
+            encode(bufSend_, sizeof(PACKET_ZA2C_WORLD_LOGIN_RESP));
+
+            SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_WORLD_LOGIN_RESP));
 
 
             break;
