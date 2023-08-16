@@ -18,9 +18,22 @@ public:
 
     virtual HRESULT ProcessEvent(size_t len);
     virtual HRESULT OnClose();
+
+    // ProcessPacket
+
 private:
     BYTE* bufSend_;
     size_t bufSendLen_;
+
+
+    HRESULT OnSelectRole(PACKET_C2ZA_SELECT_ROLE* pktIn);
+    HRESULT OnWorldLogin(PACKET_C2ZA_WORLD_LOGIN* pktIn);
+    HRESULT OnWorldLoginWarrior();
+    HRESULT OnWorldLoginKnight();
+    HRESULT OnWorldLoginMage();
+    HRESULT OnWorldLoginArcher();
+    HRESULT OnWorldLoginGM();
+
 };
 
 

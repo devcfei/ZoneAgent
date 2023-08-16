@@ -28,6 +28,7 @@ typedef struct _PACKET_HEADER
 //
 #define C2ZA_PROTO_1106_SELECT_ROLE			0x1106
 #define C2ZA_PROTO_1107_WORLD_LOGIN			0x1107
+#define C2ZA_PROTO_1461_EXIT_GAME			0x1461
 
 
 #define ZA2C_PROTO_1105_LOGIN_RESP			0x1105
@@ -65,7 +66,7 @@ struct ROLE_BRIEF
 	uint8_t classtype;
 	uint8_t town; // 0 - read, 1 - blue
 	uint32_t level;
-	uint8_t wearlist[0xA0];  // !need to be decoded
+	uint8_t wearlist[160];  // !need to be decoded
 
 };
 
@@ -88,7 +89,8 @@ C_ASSERT(sizeof(PACKET_ZA2C_LOGIN_RESP) == 959);
 typedef struct _PACKET_C2ZA_SELECT_ROLE
 {
 	PACKET_HEADER Header;
-	char data[50];
+	char unknown[5];
+	char name[45];
 }PACKET_C2ZA_SELECT_ROLE;
 C_ASSERT(sizeof(PACKET_C2ZA_SELECT_ROLE) == 0x40);
 
@@ -165,9 +167,9 @@ typedef struct _PACKET_ZA2C_WORLD_LOGIN_RESP
 	uint32_t LorePoint;
 	uint16_t unknown3;
 	uint8_t XX1;
-	uint8_t PatInvtory[0x14 * 5];
-	uint8_t XX2;
-	uint8_t CharacterInvtory[0x14 * 60];
+	uint8_t PatInventory[0x14 * 5];
+	uint8_t XX2; 
+	uint8_t CharacterInventory[0x14 * 60];
 	uint8_t XX3;
 	uint8_t WearList[0x14 * 10];
 }PACKET_ZA2C_WORLD_LOGIN_RESP;

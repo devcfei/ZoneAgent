@@ -21,6 +21,10 @@ public:
         bev = ev;
     }
 
+    void Shutdown()
+    {
+        bufferevent_free(bev);
+    }
 
     virtual HRESULT ProcessEvent(size_t len)
     {
