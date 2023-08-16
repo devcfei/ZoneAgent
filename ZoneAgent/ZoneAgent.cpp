@@ -208,6 +208,17 @@ HRESULT ZoneAgentSession::ProcessEvent(size_t len)
             Shutdown();
             break;
         }
+        case C2ZA_PROTO_1200_ROLE_MOVE:
+        {
+            OnRoleMove((PACKET_C2ZA_ROLE_MOVE*)pdata_);
+            break;
+        }
+
+        case C2ZA_PROTO_1202_ROLE_MOVE_DONE:
+        {
+            LOGI(_T("========C2ZA_PROTO_1202_ROLE_MOVE_DONE======\n"));
+            break;
+        }
 
         default:
             break;
@@ -916,6 +927,41 @@ HRESULT ZoneAgentSession::OnWorldLoginGM()
     encode(bufSend_, sizeof(PACKET_ZA2C_WORLD_LOGIN_RESP));
 
     SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_WORLD_LOGIN_RESP));
+
+    return S_OK;
+}
+
+
+
+HRESULT ZoneAgentSession::OnRoleMove(PACKET_C2ZA_ROLE_MOVE* pktIn)
+{
+
+    USES_CONVERSION;
+    LOGI(_T("========C2ZA_PROTO_1200_ROLE_MOVE======\n"));
+    LOGI(_T("TO: %d %d \n"), pktIn->destX, pktIn->destY);
+
+
+    PACKET_ZA2C_ROLE_MOVE_RESP* pkt = (PACKET_ZA2C_ROLE_MOVE_RESP*)bufSend_;
+
+    ZeroMemory(bufSend_, sizeof(PACKET_ZA2C_ROLE_MOVE_RESP));
+    pkt->Header.Size = sizeof(PACKET_ZA2C_ROLE_MOVE_RESP);
+    pkt->Header.Ctrl = 0x3;
+    pkt->Header.Cmd = 0xFF;
+    pkt->Header.Uid = 0;
+    pkt->Header.Protocol = ZA2C_PROTO_1200_ROLE_MOVE_RESP;
+
+    pkt->destX = pktIn->destX;
+    pkt->destY = pktIn->destY;
+
+    pkt->unknown1 = 1;
+    pkt->unknown2 = 1;
+
+
+
+    encode(bufSend_, sizeof(PACKET_ZA2C_ROLE_MOVE_RESP));
+    SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_ROLE_MOVE_RESP));
+
+    return S_OK;
 
     return S_OK;
 }

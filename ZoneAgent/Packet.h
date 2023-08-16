@@ -29,11 +29,14 @@ typedef struct _PACKET_HEADER
 #define C2ZA_PROTO_1106_SELECT_ROLE			0x1106
 #define C2ZA_PROTO_1107_WORLD_LOGIN			0x1107
 #define C2ZA_PROTO_1461_EXIT_GAME			0x1461
+#define C2ZA_PROTO_1200_ROLE_MOVE			0x1200
+#define C2ZA_PROTO_1202_ROLE_MOVE_DONE		0x1202
 
 
 #define ZA2C_PROTO_1105_LOGIN_RESP			0x1105
 #define ZA2C_PROTO_1106_CONFIRM_ROLE		0x1106
 #define ZA2C_PROTO_1107_WORLD_LOGIN_RESP	0x1107
+#define ZA2C_PROTO_1200_ROLE_MOVE_RESP		0x1200
 
 
 
@@ -175,6 +178,39 @@ typedef struct _PACKET_ZA2C_WORLD_LOGIN_RESP
 }PACKET_ZA2C_WORLD_LOGIN_RESP;
 
 C_ASSERT(sizeof(PACKET_ZA2C_WORLD_LOGIN_RESP) == 1677);
+
+
+// Role Move , Proto C2ZA_PROTO_1200_ROLE_MOVE
+// Client -> ZA
+typedef struct _PACKET_C2ZA_ROLE_MOVE
+{
+	PACKET_HEADER Header;
+	uint8_t unknown1;
+	uint8_t unknown2;
+	uint8_t unknown3;
+	uint8_t destX;
+	uint8_t destY;
+	uint8_t tail[6];
+}PACKET_C2ZA_ROLE_MOVE;
+
+C_ASSERT(sizeof(PACKET_C2ZA_ROLE_MOVE) == 25);
+
+
+// Role Move Resp, Proto ZA2C_PROTO_1200_ROLE_MOVE_RESP
+//  ZA -> Client
+typedef struct _PACKET_ZA2C_ROLE_MOVE_RESP
+{
+	PACKET_HEADER Header;
+	uint8_t unknown1; // 
+	uint8_t unknown2; // 
+	uint8_t unknown3; // 
+	uint8_t unknown4; // 
+	uint8_t destX;
+	uint8_t destY;
+	uint8_t tail[3];
+}PACKET_ZA2C_ROLE_MOVE_RESP;
+
+C_ASSERT(sizeof(PACKET_ZA2C_ROLE_MOVE_RESP) == 23);
 
 
 // encode/decode

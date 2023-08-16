@@ -33,6 +33,8 @@ private:
     HRESULT OnWorldLoginMage();
     HRESULT OnWorldLoginArcher();
     HRESULT OnWorldLoginGM();
+    HRESULT OnRoleMove(PACKET_C2ZA_ROLE_MOVE* pktIn);
+
 
 };
 
