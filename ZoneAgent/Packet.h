@@ -28,16 +28,20 @@ typedef struct _PACKET_HEADER
 //
 #define C2ZA_PROTO_1106_SELECT_ROLE			0x1106
 #define C2ZA_PROTO_1107_WORLD_LOGIN			0x1107
-#define C2ZA_PROTO_1461_EXIT_GAME			0x1461
 #define C2ZA_PROTO_1200_ROLE_MOVE			0x1200
 #define C2ZA_PROTO_1202_ROLE_MOVE_DONE		0x1202
+#define C2ZA_PROTO_1400_ATTACK_MONSTER		0x1400
+#define C2ZA_PROTO_1461_EXIT_GAME			0x1461
+#define C2ZA_PROTO_1800_MESSAGE				0x1800
 
 
 #define ZA2C_PROTO_1105_LOGIN_RESP			0x1105
 #define ZA2C_PROTO_1106_CONFIRM_ROLE		0x1106
 #define ZA2C_PROTO_1107_WORLD_LOGIN_RESP	0x1107
 #define ZA2C_PROTO_1200_ROLE_MOVE_RESP		0x1200
-
+#define ZA2C_PROTO_1300_MOSNTER_NEW			0x1300
+#define ZA2C_PROTO_1400_ATTACK_MONSTER_RESP	0x1400
+#define ZA2C_PROTO_1800_MESSAGE				0x1800
 
 
 
@@ -144,8 +148,8 @@ typedef struct _PACKET_ZA2C_WORLD_LOGIN_RESP
 	uint16_t MinAttack;
 	uint16_t MinMagicAttack;
 	uint16_t Defense;
-	uint16_t FileAttack;
-	uint16_t FileDefense;
+	uint16_t FireAttack;
+	uint16_t FireDefense;
 	uint16_t IceAttack;
 	uint16_t IceDefense;
 	uint16_t LightningAttack;
@@ -153,7 +157,7 @@ typedef struct _PACKET_ZA2C_WORLD_LOGIN_RESP
 	uint16_t MaxHPBar;
 	uint16_t MaxMPBar;
 	uint16_t MaxAttack;
-	uint16_t MaxMaticAttack;
+	uint16_t MaxMagicAttack;
 	uint16_t unknown2;
 	uint8_t PetAction[20];
 	char CharacterName[21];
@@ -211,6 +215,90 @@ typedef struct _PACKET_ZA2C_ROLE_MOVE_RESP
 }PACKET_ZA2C_ROLE_MOVE_RESP;
 
 C_ASSERT(sizeof(PACKET_ZA2C_ROLE_MOVE_RESP) == 23);
+
+// Monster new , Proto ZA2C_PROTO_1300_MOSNTER_NEW
+// ZA -> Client
+typedef struct _PACKET_ZA2C_MOSNTER_NEW
+{
+	PACKET_HEADER Header;
+	uint32_t Fix1[2];
+	uint8_t FixF[3];
+	uint8_t Fix0[5];
+	uint32_t ID;	// Monster ID
+	uint8_t Unk[30];
+	uint16_t Level; // Monster Level
+	uint16_t Unk1;
+	uint8_t Unk2[3];
+	uint16_t sn;
+	uint16_t id;
+	uint32_t Fix0000[2];
+	uint8_t X;
+	uint8_t Y;
+	uint16_t Fix00;
+
+}PACKET_ZA2C_MOSNTER_NEW;
+
+C_ASSERT(sizeof(PACKET_ZA2C_MOSNTER_NEW) == 0x57);
+
+
+
+// Attack Monster , Proto C2ZA_PROTO_1400_ATTACK_MONSTER
+// Client -> ZA
+
+typedef struct _PACKET_C2ZA_ATTACK_MONSTER
+{
+	PACKET_HEADER Header;
+	uint8_t unknown[2];
+	uint16_t sn;	//
+	uint16_t id;
+	uint8_t tail[20];
+}PACKET_C2ZA_ATTACK_MONSTER;
+
+C_ASSERT(sizeof(PACKET_C2ZA_ATTACK_MONSTER) == 40);
+
+
+// Attack Monster Resp , Proto ZA2C_PROTO_1400_ATTACK_MONSTER_RESP
+// ZA -> Client
+typedef struct  _PACKET_ZA2C_ATTACK_MONSTER_RESP
+{
+	PACKET_HEADER Header;
+	uint8_t Unk[29];
+	uint32_t Value;
+	uint8_t Tail[3];
+}PACKET_ZA2C_ATTACK_MONSTER_RESP;
+
+C_ASSERT(sizeof(PACKET_ZA2C_ATTACK_MONSTER_RESP) == 50);
+
+
+
+// Message , Proto C2ZA_PROTO_1800_MESSAGE
+// Client -> ZA
+typedef struct _PACKET_C2ZA_MESSAGE
+{
+	PACKET_HEADER Header;
+	uint16_t Type;
+	uint8_t Unk[23];
+	char message[0x79];
+}PACKET_C2ZA_MESSAGE;
+
+C_ASSERT(sizeof(_PACKET_C2ZA_MESSAGE) == 0xA0);
+
+
+// Message , Proto ZA2C_PROTO_1800_MESSAGE
+// ZA -> Client
+typedef struct _PACKET_ZA2C_MESSAGE
+{
+	PACKET_HEADER Header;
+	uint32_t tag0;
+	uint16_t tag1;
+	char message[88];
+}PACKET_ZA2C_MESSAGE;
+C_ASSERT(sizeof(PACKET_ZA2C_MESSAGE) == 108);
+
+
+
+
+
 
 
 // encode/decode

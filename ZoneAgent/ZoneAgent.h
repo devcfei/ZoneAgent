@@ -34,6 +34,13 @@ private:
     HRESULT OnWorldLoginArcher();
     HRESULT OnWorldLoginGM();
     HRESULT OnRoleMove(PACKET_C2ZA_ROLE_MOVE* pktIn);
+    HRESULT OnAttackMonster(PACKET_C2ZA_ATTACK_MONSTER* pktIn);
+    HRESULT OnMessage(PACKET_C2ZA_MESSAGE* pktIn);
+    HRESULT ProcessCommand(char* cmd);
+
+
+    HRESULT SendMessage(uint32_t tag0, uint16_t tag1, char* message);
+    HRESULT MonsterNew(DWORD dwID, WORD wLevel, BYTE cx, BYTE cy);
 
 
 };

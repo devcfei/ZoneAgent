@@ -220,6 +220,18 @@ HRESULT ZoneAgentSession::ProcessEvent(size_t len)
             break;
         }
 
+        case C2ZA_PROTO_1400_ATTACK_MONSTER:
+        {
+            OnAttackMonster((PACKET_C2ZA_ATTACK_MONSTER*)pdata_);
+            break;
+        }
+
+        case C2ZA_PROTO_1800_MESSAGE:
+        {
+            OnMessage((PACKET_C2ZA_MESSAGE*)pdata_);
+            break;
+        }
+
         default:
             break;
         }
@@ -284,26 +296,47 @@ HRESULT ZoneAgentSession::OnWorldLogin(PACKET_C2ZA_WORLD_LOGIN* pktIn)
 
     // Role info
     pkt->unknown1 = 1;
+    pkt->unknown2 = 1;
+    pkt->unknown3 = 1;
+    pkt->MP = 11;
+    pkt->Str = 200;
+    pkt->Magic = 61;
+    pkt->Dex = 46;
+    pkt->Vit = 50;
+    pkt->Mana = 65;
+    pkt->MaxHPStore = 200000;
+    pkt->MaxMPStore = 20000;
+    pkt->HP = 900;
+    pkt->Point = 800;
+    pkt->MinAttack = 100;
+    pkt->MinMagicAttack = 500;
+    pkt->Defense = 200;
+    pkt->FireAttack = 100;
+    pkt->FireDefense= 200;
+    pkt->IceAttack = 200;
+    pkt->IceDefense = 300;
+    pkt->LightningAttack = 300;
+    pkt->LightningDefense = 400;
+    pkt->MaxHPBar = 1000;
+    pkt->MaxMPBar = 500;
+    pkt->MaxAttack = 200;
+    pkt->MaxMagicAttack = 1000;
+
+    pkt->Sinfo = 1025;
+    pkt->Woonz = 1000000000;
+    pkt->MPStore = 5000;
+    pkt->HPStore = 180000;
+    pkt->LorePoint = 5000;
+    StringCchCopyA(pkt->CharacterName, 21, pktIn->name);
     pkt->Level = 165;
     pkt->Exp = 4220806300;
     pkt->MapIndex = 37;
     pkt->MapCell = MAKEWORD(93, 75);
 
-    pkt->MP = 10;
-    pkt->HP = 900;
-    pkt->Str = 200;
-    pkt->Magic = 60;
-    pkt->Dex = 46;
-    pkt->Vit = 50;
-    pkt->Mana = 65;
-    pkt->MaxHPBar = 1000;
-    pkt->MaxMPBar = 500;
-    pkt->MaxHPStore = 200000;
-    pkt->MaxMPStore = 5000;
-
-    pkt->Sinfo = 1025;
-    pkt->LorePoint = 5000;
-    StringCchCopyA(pkt->CharacterName, 21, pktIn->name);
+    for (int i = 0; i < 24; ++i)
+    {
+        pkt->Skill[i] = 0xFF;
+    }
 
 
     if (0 == lstrcmpA(pktIn->name, "Warrior"))
@@ -962,6 +995,192 @@ HRESULT ZoneAgentSession::OnRoleMove(PACKET_C2ZA_ROLE_MOVE* pktIn)
     SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_ROLE_MOVE_RESP));
 
     return S_OK;
+
+}
+
+
+HRESULT ZoneAgentSession::OnAttackMonster(PACKET_C2ZA_ATTACK_MONSTER* pktIn)
+{
+    USES_CONVERSION;
+    LOGI(_T("========C2ZA_PROTO_1400_ATTACK_MONSTER======\n"));
+    LOGI(_T("SN: %d ID: %d \n"), pktIn->sn, pktIn->id);
+
+
+    PACKET_ZA2C_ATTACK_MONSTER_RESP* pkt = (PACKET_ZA2C_ATTACK_MONSTER_RESP*)bufSend_;
+
+    ZeroMemory(bufSend_, sizeof(PACKET_ZA2C_ATTACK_MONSTER_RESP));
+    pkt->Header.Size = sizeof(PACKET_ZA2C_ATTACK_MONSTER_RESP);
+    pkt->Header.Ctrl = 0x3;
+    pkt->Header.Cmd = 0xFF;
+    pkt->Header.Uid = 0;
+    pkt->Header.Protocol = ZA2C_PROTO_1400_ATTACK_MONSTER_RESP;
+
+	uint8_t unk[29] =
+	{
+		 0xA9,0xAE,0x00,0x00,0x00,0x00,0xA8,0xAF,0x00,0x00,
+		 0x02,0x00,0x00,0x00,0xC8,0x8A,0x87,0x52,0x01,0x00,
+		 0x00,0x01,0x00,0x00,0x00,0x02,0x00,0x00,0x00
+	};
+    CopyMemory(pkt->Unk, unk, 29);
+    pkt->Value = 100;
+    pkt->Tail[0] = 0xCA;
+    pkt->Tail[1] = 0x6A;
+    pkt->Tail[2] = 0xFC;
+
+
+    encode(bufSend_, sizeof(PACKET_ZA2C_ATTACK_MONSTER_RESP));
+    SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_ATTACK_MONSTER_RESP));
+
+
+
+    return S_OK;
+}
+
+
+HRESULT ZoneAgentSession::OnMessage(PACKET_C2ZA_MESSAGE* pktIn)
+{
+    LOGI(_T("========C2ZA_PROTO_1800_MESSAGE======\n"));
+    LOGI(_T("Type: %d\n"), pktIn->Type);
+
+    if (pktIn->Type == 0x800) // chat window message with ! prefix
+    {
+        USES_CONVERSION;
+        LOGI(_T("MSG: %s\n"), A2T(pktIn->message));
+        ProcessCommand(pktIn->message);
+
+
+    }
+
+    return S_OK;
+}
+
+
+HRESULT ZoneAgentSession::ProcessCommand(char* cmd)
+{
+    HRESULT hr = S_OK;
+    char args[10][16] = {0};
+
+    // parse the command
+    int c = 0;
+    int i = 0;
+    int j = 0;
+    char* p = cmd;
+    if (lstrlenA(p))
+        c = 1;
+    while (*p)
+    {
+        if (*p == ' ')
+        {
+            while (*p == ' ')
+                p++;
+
+            i++;
+            j = 0;
+            c++;
+        }
+
+        args[i][j++] = *p;
+        p++;
+    }
+
+
+    // dispatch command
+    if (!lstrcmpA(args[0], "echo"))
+    {
+        if (lstrlenA(args[1]))
+            SendMessage(0,0,args[1]);
+    }
+    else if (!lstrcmpA(args[0], "msg"))
+    {
+        uint32_t tag0 = StrToIntA(args[1]);
+        uint16_t tag1 = StrToIntA(args[2]);
+        if (lstrlenA(args[3]))
+            SendMessage(tag0, tag1, args[3]);
+    }
+    else if (!lstrcmpA(args[0], "monster"))
+    {
+        if (!lstrcmpA(args[1], "new") )
+        {
+            DWORD id = StrToIntA(args[2]);
+            WORD level = StrToIntA(args[3]);
+            BYTE cx = StrToIntA(args[4]);
+            BYTE cy = StrToIntA(args[5]);
+            MonsterNew(id, level, cx, cy);       
+        }
+    }
+
+    return hr;
+}
+
+
+HRESULT ZoneAgentSession::SendMessage(uint32_t tag0, uint16_t tag1, char* message)
+{
+    HRESULT hr = S_OK;
+    PACKET_ZA2C_MESSAGE* pkt = (PACKET_ZA2C_MESSAGE*)bufSend_;
+    ZeroMemory(bufSend_, sizeof(PACKET_ZA2C_MESSAGE));
+    pkt->Header.Size = sizeof(PACKET_ZA2C_MESSAGE);
+    pkt->Header.Ctrl = 0x3;
+    pkt->Header.Cmd = 0xFF;
+    pkt->Header.Uid = 0;
+    pkt->Header.Protocol = ZA2C_PROTO_1800_MESSAGE;
+
+
+    pkt->tag0 = tag0;
+    pkt->tag1 = tag1;
+    StrCpyA(pkt->message, message);
+
+    
+    encode(bufSend_, sizeof(PACKET_ZA2C_MESSAGE));
+    SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_MESSAGE));
+
+
+    return hr;
+
+}
+
+
+
+HRESULT ZoneAgentSession::MonsterNew(DWORD dwID, WORD wLevel, BYTE cx, BYTE cy)
+{
+
+    PACKET_ZA2C_MOSNTER_NEW* pkt = (PACKET_ZA2C_MOSNTER_NEW*)bufSend_;
+
+
+    ZeroMemory(bufSend_, sizeof(PACKET_ZA2C_MOSNTER_NEW));
+    pkt->Header.Size = sizeof(PACKET_ZA2C_MOSNTER_NEW);
+    pkt->Header.Ctrl = 0x3;
+    pkt->Header.Cmd = 0xFF;
+    pkt->Header.Uid = 0;
+    pkt->Header.Protocol = ZA2C_PROTO_1300_MOSNTER_NEW;
+
+    pkt->Fix1[0] = 0x00000001;
+    pkt->Fix1[1] = 0x00000001;
+    pkt->FixF[0] = 0xFF;
+    pkt->FixF[1] = 0xFF;
+    pkt->FixF[2] = 0xFF;
+    pkt->Fix0[0] = 0x0;
+    pkt->Fix0[1] = 0x0;
+    pkt->Fix0[2] = 0x0;
+    pkt->Fix0[3] = 0x0;
+    pkt->Fix0[4] = 0x0;
+
+    pkt->ID = dwID;
+    for (int i = 0; i < 10; ++i)
+    {
+        pkt->Unk[3 * i] = 0xFF;
+        pkt->Unk[3 * i+1] = 0xCD;
+    }
+    pkt->Unk1 = 0xFF3F;
+    pkt->Level = wLevel;
+    pkt->sn = 1024;
+    static uint16_t id = 1;
+    pkt->id = id++;
+    pkt->X = cx;
+    pkt->Y = cy;
+
+
+    encode(bufSend_, sizeof(PACKET_ZA2C_MOSNTER_NEW));
+    SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_MOSNTER_NEW));
 
     return S_OK;
 }
