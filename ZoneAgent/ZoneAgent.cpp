@@ -205,7 +205,7 @@ HRESULT ZoneAgentSession::ProcessEvent(size_t len)
 
         case C2ZA_PROTO_1461_EXIT_GAME:
         {
-            Shutdown();
+            OnExitGame();
             break;
         }
         case C2ZA_PROTO_1200_ROLE_MOVE:
@@ -1036,6 +1036,14 @@ HRESULT ZoneAgentSession::OnAttackMonster(PACKET_C2ZA_ATTACK_MONSTER* pktIn)
     return S_OK;
 }
 
+HRESULT ZoneAgentSession::OnExitGame()
+{
+    LOGI(_T("========C2ZA_PROTO_1461_EXIT_GAME======\n"));
+    WorldExit();
+    return S_OK;
+}
+
+
 
 HRESULT ZoneAgentSession::OnMessage(PACKET_C2ZA_MESSAGE* pktIn)
 {
@@ -1184,3 +1192,22 @@ HRESULT ZoneAgentSession::MonsterNew(DWORD dwID, WORD wLevel, BYTE cx, BYTE cy)
 
     return S_OK;
 }
+
+HRESULT ZoneAgentSession::WorldExit()
+{
+    PACKET_ZA2C_WORLD_EXIT* pkt = (PACKET_ZA2C_WORLD_EXIT*)bufSend_;
+
+
+    ZeroMemory(bufSend_, sizeof(PACKET_ZA2C_WORLD_EXIT));
+    pkt->Header.Size = sizeof(PACKET_ZA2C_WORLD_EXIT);
+    pkt->Header.Ctrl = 0x3;
+    pkt->Header.Cmd = 0xFF;
+    pkt->Header.Uid = 0;
+    pkt->Header.Protocol = ZA2C_PROTO_1108_WORLD_EXIT;
+
+    encode(bufSend_, sizeof(PACKET_ZA2C_WORLD_EXIT));
+    SendData((BYTE*)pkt, sizeof(PACKET_ZA2C_WORLD_EXIT));
+
+    return S_OK;
+}
+
