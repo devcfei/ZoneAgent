@@ -268,20 +268,42 @@ typedef struct _PACKET_C2ZA_ATTACK_MONSTER
 	uint8_t tail[20];
 }PACKET_C2ZA_ATTACK_MONSTER;
 
-C_ASSERT(sizeof(PACKET_C2ZA_ATTACK_MONSTER) == 40);
+C_ASSERT(sizeof(PACKET_C2ZA_ATTACK_MONSTER) == 0x28);
 
 
 // Attack Monster Resp , Proto ZA2C_PROTO_1400_ATTACK_MONSTER_RESP
 // ZA -> Client
+#define MOSNTER_STATUS_ALIVE 1
+#define MOSNTER_STATUS_DEAD	 2
+#define MOSNTER_STATUS_PK	 3
 typedef struct  _PACKET_ZA2C_ATTACK_MONSTER_RESP
 {
 	PACKET_HEADER Header;
-	uint8_t Unk[29];
-	uint32_t Value;
-	uint8_t Tail[3];
+	uint8_t cx;		// Character position X
+	uint8_t cy;		// Character position Y
+	uint16_t fix0; //  fix to 0, and must set
+	uint8_t unused1[2]; // seems unused
+	uint8_t mx;		// Monster postion X
+	uint8_t my;		// Monster postion Y
+	uint8_t unused2[2]; // seems unused
+	uint32_t fix2;  // fixed to 2 , and must set
+	uint16_t sn;
+	uint16_t id;
+	uint16_t status;//  MOSNTER_STATUS_
+	uint16_t count;	// Attacked count
+	uint16_t cmp;	// Character MP
+	uint8_t unk0[5];
+	
+	uint16_t damage;  // Damage value
+	uint8_t unk1;
+	uint16_t chp;	// Character HP
+	uint8_t unk2;
+	uint8_t mhpp;   // Monster HP percent, 255-full, 0-empty
+
+
 }PACKET_ZA2C_ATTACK_MONSTER_RESP;
 
-C_ASSERT(sizeof(PACKET_ZA2C_ATTACK_MONSTER_RESP) == 50);
+C_ASSERT(sizeof(PACKET_ZA2C_ATTACK_MONSTER_RESP) == 0x32);
 
 
 

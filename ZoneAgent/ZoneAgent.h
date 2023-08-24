@@ -45,6 +45,10 @@ private:
     HRESULT WorldExit();
 
 
+private:
+    BYTE cx_ = 93; // Character postion X
+    BYTE cy_ = 75; // Character postion Y
+
 };
 
 

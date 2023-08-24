@@ -232,8 +232,11 @@ HRESULT ZoneAgentSession::ProcessEvent(size_t len)
             break;
         }
 
-        default:
-            break;
+        default:        
+            LOGI(_T("========UNSUPPORTED PACKET======\n"));
+            LOGI(_T("Size %d \n"), hdr->Size);
+            LOGI(_T("Protocol 0x%04X\n"), hdr->Protocol);
+            break;        
         }
 
     }
@@ -330,8 +333,8 @@ HRESULT ZoneAgentSession::OnWorldLogin(PACKET_C2ZA_WORLD_LOGIN* pktIn)
     StringCchCopyA(pkt->CharacterName, 21, pktIn->name);
     pkt->Level = 165;
     pkt->Exp = 4220806300;
-    pkt->MapIndex = 37;
-    pkt->MapCell = MAKEWORD(93, 75);
+    pkt->MapIndex = 37;         // TODO: why this value doesn't work?
+    pkt->MapCell = MAKEWORD(cx_, cy_);
 
     for (int i = 0; i < 24; ++i)
     {
@@ -1015,17 +1018,51 @@ HRESULT ZoneAgentSession::OnAttackMonster(PACKET_C2ZA_ATTACK_MONSTER* pktIn)
     pkt->Header.Uid = 0;
     pkt->Header.Protocol = ZA2C_PROTO_1400_ATTACK_MONSTER_RESP;
 
-	uint8_t unk[29] =
-	{
-		 0xA9,0xAE,0x00,0x00,0x00,0x00,0xA8,0xAF,0x00,0x00,
-		 0x02,0x00,0x00,0x00,0xC8,0x8A,0x87,0x52,0x01,0x00,
-		 0x00,0x01,0x00,0x00,0x00,0x02,0x00,0x00,0x00
-	};
-    CopyMemory(pkt->Unk, unk, 29);
-    pkt->Value = 100;
-    pkt->Tail[0] = 0xCA;
-    pkt->Tail[1] = 0x6A;
-    pkt->Tail[2] = 0xFC;
+    pkt->cx = cx_;
+    pkt->cy = cy_ ;
+
+    pkt->mx = 95;  // not used ?
+    pkt->my = 77;
+    static uint8_t cnt = 0;
+    cnt++;
+
+
+    pkt->fix2 = 2; 
+    pkt->count = cnt;
+    if (cnt == 255)
+    {
+        pkt->status = MOSNTER_STATUS_DEAD;
+        cnt = 0;
+    }
+    else
+        pkt->status = MOSNTER_STATUS_ALIVE;
+
+
+    pkt->unused1[0] = cnt;
+    pkt->unused1[1] = cnt;
+
+
+    pkt->unused2[0] = cnt;
+    pkt->unused2[1] = cnt;
+
+
+    pkt->cmp = 400;
+
+    pkt->sn = pktIn->sn;
+    pkt->id = pktIn->id;
+
+    pkt->damage = cnt;
+    pkt->chp = 800;
+
+    pkt->mhpp = 255 - cnt;
+    pkt->unk0[0] = cnt;
+    pkt->unk0[1] = cnt;
+    pkt->unk0[2] = cnt;
+    pkt->unk0[3] = cnt;
+    pkt->unk0[4] = cnt;
+    pkt->unk1 = cnt;
+    pkt->unk2 = cnt;
+
 
 
     encode(bufSend_, sizeof(PACKET_ZA2C_ATTACK_MONSTER_RESP));
@@ -1161,16 +1198,16 @@ HRESULT ZoneAgentSession::MonsterNew(DWORD dwID, WORD wLevel, BYTE cx, BYTE cy)
     pkt->Header.Uid = 0;
     pkt->Header.Protocol = ZA2C_PROTO_1300_MOSNTER_NEW;
 
-    pkt->Fix1[0] = 0x00000001;
-    pkt->Fix1[1] = 0x00000001;
-    pkt->FixF[0] = 0xFF;
-    pkt->FixF[1] = 0xFF;
-    pkt->FixF[2] = 0xFF;
-    pkt->Fix0[0] = 0x0;
-    pkt->Fix0[1] = 0x0;
-    pkt->Fix0[2] = 0x0;
-    pkt->Fix0[3] = 0x0;
-    pkt->Fix0[4] = 0x0;
+    pkt->Fix1[0] = 0x11111111; // seems not used
+    pkt->Fix1[1] = 0x11111111;  // seems not used
+    pkt->FixF[0] = 0xFF; // seems not used
+    pkt->FixF[1] = 0xFF; // seems not used
+    pkt->FixF[2] = 0xFF; // seems not used
+    pkt->Fix0[0] = 0x00; // seems not used
+    pkt->Fix0[1] = 0x11; // seems not used
+    pkt->Fix0[2] = 0x22; // seems not used
+    pkt->Fix0[3] = 0x33; // seems not used
+    pkt->Fix0[4] = 0x44; // seems not used
 
     pkt->ID = dwID;
     for (int i = 0; i < 10; ++i)
@@ -1185,6 +1222,14 @@ HRESULT ZoneAgentSession::MonsterNew(DWORD dwID, WORD wLevel, BYTE cx, BYTE cy)
     pkt->id = id++;
     pkt->X = cx;
     pkt->Y = cy;
+
+    //pkt->Unk2[0] = 0xab;
+    //pkt->Unk2[1] = 0xcd;
+    //pkt->Unk2[2] = 0xef;
+
+    //pkt->Fix0000[0] = 0x1234abcd;
+    //pkt->Fix0000[1] = 0x5678cdef;
+    //pkt->Fix00 = 0xbaef;
 
 
     encode(bufSend_, sizeof(PACKET_ZA2C_MOSNTER_NEW));
