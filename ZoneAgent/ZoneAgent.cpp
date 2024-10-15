@@ -1028,11 +1028,17 @@ HRESULT ZoneAgentSession::OnAttackMonster(PACKET_C2ZA_ATTACK_MONSTER* pktIn)
 
 
     pkt->fix2 = 2; 
-    pkt->count = cnt;
+    static uint8_t count = 1;
+    pkt->count = count;
+    count++;
+    if (count == 6)
+        count = 1;
+    
     if (cnt == 255)
     {
         pkt->status = MOSNTER_STATUS_DEAD;
         cnt = 0;
+        count = 1;
     }
     else
         pkt->status = MOSNTER_STATUS_ALIVE;

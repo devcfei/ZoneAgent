@@ -290,7 +290,8 @@ typedef struct  _PACKET_ZA2C_ATTACK_MONSTER_RESP
 	uint16_t sn;
 	uint16_t id;
 	uint16_t status;//  MOSNTER_STATUS_
-	uint16_t count;	// Attacked count
+	uint8_t u0;	
+	uint8_t count;	// Attacked count
 	uint16_t cmp;	// Character MP
 	uint8_t unk0[5];
 	
